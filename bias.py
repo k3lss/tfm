@@ -5,35 +5,36 @@ import matplotlib.pyplot as plt
 from scipy.optimize import minimize_scalar
 from pathlib import Path
 
-
+# Definimos los parámetros de la simulación
 LBox = 1000
 V=LBox**3
 dk = 2*np.pi/LBox
 
-#cargamos los valores de N para la densidad
+# Cargamos los valores de N para la obtener la densidad (estos se han calculado anteriormente)
 N = np.loadtxt("/home/anguren/celia/full_simulation/Nvalue_R20.txt")
 n=N/V
 
-# cargamos los límites de los bines
+# Cargamos los límites de los bines
 ruta_bins = "/home/anguren/celia/full_simulation/bins_lims_R20.txt"
 sobredens_bins = np.genfromtxt(ruta_bins, delimiter=" ", skip_header=0, names=True)
-#checkeamos que los límites estén bien, por si acaso
+# Comprobamos que los límites estén bien
 print(sobredens_bins)
 
 
+# Definimos nuestro archivo de salida con la siguiente estructura: sobredens_low | sobredens_high | bias_auto_df | error_auto_df | bias_cross_df | error_cross_df
 archivo_salida = "/home/anguren/celia/full_simulation/bias_R20/bias_df.txt"
-#las columnas van a ser: sobredens_low | sobredens_high | bias_auto_df | error_auto_df | bias_cross_df | error_cross_df
 bias_salida = np.zeros((len(N),6))
 
-bias_salida[:,0] = sobredens_bins['limite_inferior'] # type: ignore
-bias_salida[:,1] = sobredens_bins['limite_superior'] # type: ignore
+bias_salida[:,0] = sobredens_bins['limite_inferior']
+bias_salida[:,1] = sobredens_bins['limite_superior']
 
-
+# Establecemos límites a los intervalos en los que calculamos el biS
 b_low_auto= -0  # el bias auto no puede ser negativo
 b_low_cross = -15
 b_high = 100 # valor maximo para el calculo del bias
 
-# definimos las funciones que vamos a utilizar
+
+# Definimos la chi²
 def chi2(P, param, Pm, s, value):
     if value == 1:
         # Caso auto: b²
@@ -46,6 +47,8 @@ def chi2(P, param, Pm, s, value):
     else:
         raise ValueError("value debe ser 0 (cross) o 1 (auto)")
 
+
+# Definimos una función para minimizar la chi² y sacar el error
 def resultbias(P, Pm, s, value, b_low, b_high):
     if value not in [0, 1]:
         raise ValueError("value debe ser 0 (cross) o 1 (auto)")
@@ -58,8 +61,8 @@ def resultbias(P, Pm, s, value, b_low, b_high):
             bounds=(b_low, b_high),
             method='bounded'
         )
-        b_min = resultado.x # type: ignore
-        chi2_min = resultado.fun # type: ignore
+        b_min = resultado.x
+        chi2_min = resultado.fun
 
         # Generar puntos alrededor del mínimo
         b_vals = np.linspace(b_min - 0.5, b_min + 0.5, 200)
@@ -82,8 +85,8 @@ def resultbias(P, Pm, s, value, b_low, b_high):
             bounds=(theta_low, theta_high),
             method='bounded'
         )
-        theta_min = resultado_theta.x # type: ignore # type: ignore
-        chi2_min = resultado_theta.fun # type: ignore # type: ignore
+        theta_min = resultado_theta.x 
+        chi2_min = resultado_theta.fun 
         b_min = np.sqrt(theta_min)
 
         # Generar puntos alrededor del mínimo en theta
@@ -100,13 +103,16 @@ def resultbias(P, Pm, s, value, b_low, b_high):
 
     return b_min, inc
 
-##############
-#CÁLCULO BIAS#
-##############
 
+
+# Aplicamos las funciones para calcular el bias
+
+# Cargamos los valores de k y Pk obtenidos para el density field de materia oscura
 k_auto_df = np.loadtxt("/home/anguren/celia/power_df/Pk_df.txt")[:,0]
 P_auto_df = np.loadtxt("/home/anguren/celia/power_df/Pk_df.txt")[:,1]
 
+
+# Aplicamos en un bucle las funciones para cada bin de sobredensidad
 for i in range(len(N)):
     ruta_halo = f"/home/anguren/celia/full_simulation/power_bin_R20/Pk_selec_{i}.txt"
     ruta_cross = f"/home/anguren/celia/full_simulation/power_cross_R20/Pk_cross_df_{i}.txt"
@@ -134,12 +140,12 @@ for i in range(len(N)):
     bias_salida[i][4], bias_salida[i][5] = resultbias(P_cross_df, P_auto_df, error_cross, 0, b_low_cross, b_high)
      
 
-    #carpeta para guardar los plots
+    # Creamos una carpeta para guardar los plots
     carpeta = Path(f"/home/anguren/celia/full_simulation/bias_R20/plots_powers/bin_{i}")
     carpeta.mkdir(parents=True, exist_ok=True)
 
 
-    # plot auto
+    # Generamos el plot del auto
 
     plt.figure(figsize=(8,6))
     plt.loglog(k_hal, P_hal, 'ro', label='halo')
@@ -158,8 +164,8 @@ for i in range(len(N)):
     plt.close()
 
 
-    # plot cross
-    # Usar escala lineal si hay valores negativos
+    # Generamos el plot cross
+    # Usamos escala lineal si hay valores negativos
     use_log = np.all(P_cross_df > 0) and np.all(bias_salida[i][4] * P_auto_df > 0)
 
     if use_log:
@@ -179,5 +185,5 @@ for i in range(len(N)):
     plt.savefig(carpeta / f"cross_bin_{i}.png", dpi=300)
     plt.close()
 
-
+# Exportamos el archivo
 np.savetxt(archivo_salida, bias_salida, fmt=['%.5f', '%.5f' , '%.5f', '%.5f' , '%.5f' , '%.5f'], header='sobredens_low sobredens_high bias_auto_df error_auto_df bias_cross_df error_cross_df' )
