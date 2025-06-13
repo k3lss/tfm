@@ -51,6 +51,7 @@ N = np.zeros(len(bin_limits[:,0]))
 #----------------------------------------------------------------------
 '''
 Esta parte del código es opcional. Puede correrse en un script independiente.
+Sirve para generar archivos para los bines en sobredensidad.
 '''
 
 # Creamos un diccionario para guardar los bines de halos. Estos nos serán útiles en otros códigos
