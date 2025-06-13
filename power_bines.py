@@ -1,3 +1,8 @@
+'''
+Script para calcular el power spectrum de los bines de halos. 
+En este caso los bines están definidos en sobredensidad, pero se puede realizar
+el mismo procedimiento para bines en masa'''
+
 import matplotlib.pyplot as plt 
 import numpy as np 
 from nbodykit.lab import ArrayCatalog, FFTPower
@@ -12,15 +17,15 @@ kf = 2*np.pi/BoxSize
 Verbose=False
 
 # Fichero de entrada
-datos = np.genfromtxt("/home/anguren/celia/full_simulation/sobredensidad_halos_corrected.csv", delimiter=" ", skip_header=0, names=True) # Sobredensidad
+datos = np.genfromtxt("ruta-al-fichero-de-datos-de-sobredensidad", delimiter=" ", skip_header=0, names=True) # Sobredensidad
 
 # Fichero para guardar los límites de los bines
-ruta_bins = "/home/anguren/celia/full_simulation/bins_lims.txt"
+ruta_bins = "ruta-al-fichero-de-limites-de-bins"
 
 # Ficheros de salida
-salida = f"/home/anguren/celia/full_simulation/bines/bin_sobdens_{i}.txt" # Archivo para guardar los bines en sobredensidad
-salida_N = "/home/anguren/celia/full_simulation/Nvalue.txt" # Archivo para guardar el número de halos por bin
-ruta_directorio = "/home/anguren/celia/full_simulation/power_bin" # Carpeta en la que se guardan los valores del power spectrum
+salida = "ruta-al-fichero" # Archivo para guardar los bines en sobredensidad
+salida_N = "ruta-al-fichero" # Archivo para guardar el número de halos por bin
+ruta_directorio = "ruta-a-la-carpeta" # Carpeta en la que se guardan los valores del power spectrum
 
 
 
@@ -31,7 +36,7 @@ x, y, z, sobredensidad = datos['x'], datos['y'], datos['z'], datos['sobredensida
 P_k = {}
 k_halos = {}
 
-# Definimos los bines para que todos tengan el mismo número de halos
+# Definimos los bines para que todos tengan el mismo número de halos (en este caso, 50 bines con el mismo numero de halos)
 df = pd.DataFrame({'x': x, 'y': y, 'z': z, 'sobredensidad': sobredensidad})
 df['bin'], bin_edges = pd.qcut(df['sobredensidad'], q=50, labels=False, retbins=True)
 
@@ -42,6 +47,11 @@ print(bin_limits) # Comprobamos que los límites guardados tengan sentido
 
 # Creamos la variable N, que luego nos servirá para guardar el número de halos por bin
 N = np.zeros(len(bin_limits[:,0]))
+
+#----------------------------------------------------------------------
+'''
+Esta parte del código es opcional. Puede correrse en un script independiente.
+'''
 
 # Creamos un diccionario para guardar los bines de halos. Estos nos serán útiles en otros códigos
 selection = {}
@@ -54,6 +64,8 @@ for i in range(50):
     np.savetxt(salida, bin_sobredens, header="x y z sobredensidad") # Guardamos el bin de sobredensidad para futuro uso
 
 np.savetxt(salida_N, N) # Guardamos N para luego calcular el shotnoise
+
+#---------------------------------------------------------------------
 
 
 # Definimos una función para calcular el power spectrum de los halos mediante FFTPower
