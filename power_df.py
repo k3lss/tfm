@@ -1,3 +1,10 @@
+'''
+Script para calcular el auto power spectrum de las partículas de DM a traveś de un density
+field.
+También se puede calcular el power spectrum de la DM sin utilizar partículas, hay un
+ejemplo en otro script
+'''
+
 import numpy as np
 import matplotlib
 matplotlib.use('Agg')
@@ -23,4 +30,4 @@ Pk = results.power
 Pk_corr = Pk['power'].real - Pk.attrs['shotnoise']
 
 # Exportamos los valores obtenidos
-np.savetxt('/home/anguren/celia/power_df/Pk_df.txt',np.column_stack((Pk['k'], Pk_corr)) )
+np.savetxt('fichero-de-salida',np.column_stack((Pk['k'], Pk_corr)) )

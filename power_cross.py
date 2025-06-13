@@ -1,3 +1,8 @@
+'''
+Script para calcular el cross power spectrum. Utilizamos para la DM un density field. 
+Se puede hacer también sin este fichero (hay un ejemplo en otro script)
+'''
+
 import numpy as np 
 from nbodykit.lab import ArrayCatalog, FFTPower
 from nbodykit.lab import BigFileMesh
@@ -10,17 +15,17 @@ kf = 2*np.pi/BoxSize
 
 Verbose=False
 
-# Fichero de entrada
-f_particles="/home/adrian/Notebooks/PNG_UNITsim/data/unitsim_fnl0_1_032_density" # Archivo con las partículas
+# Fichero de entrada de las partículas de DM
+f_particles="/home/adrian/Notebooks/PNG_UNITsim/data/unitsim_fnl0_1_032_density"
 
 # Número de halos por bin
-N = np.loadtxt("/home/anguren/celia/full_simulation/Nvalue_R20.txt")
+N = np.loadtxt("ruta-al-fichero-de-N")
 
 # Archivo bin sobredensidad
-bin_sobdens = f'/home/anguren/celia/full_simulation/bines/bin_sobdens_{i}.txt'
+bin_sobdens = "ruta-al-bin-de-sobredensidad"
 
 # Archivo para guardar la salida
-salida = f"/home/anguren/celia/full_simulation/power_cross/Pk_cross_df_{i}.txt"
+salida = "fichero-de-salida"
 
 
 # Cargamos el fichero de las partículas como un mesh utilizando BigFileMesh
