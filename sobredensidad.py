@@ -1,3 +1,7 @@
+'''
+Script para calcular la sobredensidad
+'''
+
 import numpy as np
 from scipy.spatial import cKDTree
 import pandas as pd
@@ -27,7 +31,7 @@ print("x min:", np.min(x), "x max:", np.max(x))
 print("y min:", np.min(y), "y max:", np.max(y))
 print("z min:", np.min(z), "z max:", np.max(z))
 
-# Imponemos una corrección a las coordenadas en caso de que estas esten fuera de la caja
+# Imponemos una corrección a las coordenadas para reasegurar que estas esten fuera de la caja
 x = np.mod(x, L)
 y = np.mod(y, L)
 z = np.mod(z, L)
@@ -49,7 +53,7 @@ def compute_neighbors_batch(start, end):
 batch_size = 50000
 n_halos = np.zeros(len(x), dtype=int)
 
-# Aplicamos la función a cada barch
+# Aplicamos la función a cada batch
 for i in range(0, len(x), batch_size):
     print(f"Processing batch {i} to {min(i + batch_size, len(x))}...")
     n_halos[i:i + batch_size] = compute_neighbors_batch(i, min(i + batch_size, len(x)))
@@ -58,7 +62,7 @@ for i in range(0, len(x), batch_size):
 N_mean = np.mean(n_halos)
 sobredensidad = (n_halos - N_mean) / N_mean 
 
-# Visualizamos algunos datos de sobredensidad y la forma de la matriz de datos guardados para comprobar que todo va bien
+# Visualizamos algunos datos de sobredensidad y la forma de la matriz de datos guardados para comprobar que todo funciona correctamente
 print("Valores de sobredensidad:", sobredensidad[:10])
 print("Forma de la matriz guardada:", np.column_stack((x, y, z, sobredensidad)).shape)
 
